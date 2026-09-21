@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebNest</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebNest.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        @* <nav style="background: linear-gradient(90deg, #EAF0FF, #F3F4FF, #F5F3FF);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+
+            <div style="max-width:1200px; margin:auto; display:flex; align-items:center; justify-content:space-between; padding:0 20px;">
+
+                <!-- LEFT: LOGO -->
+                <a href="/" style="display:flex; align-items:center; text-decoration:none;">
+                    <img src="~/images/WebNest Logo.png" alt="WebNest Logo"
+                         style="height:60px;">
+                </a>
+
+
+                <!-- RIGHT: AUTH BUTTONS -->
+                <div style="display:flex; gap:10px; align-items:center;">
+
+                    <a href="/Account/Login"
+                           style="background:#D1D5DB;
+                        color:#1E3A8A;
+                        padding:6px 14px;
+                        border-radius:8px;
+                        text-decoration:none;
+                        font-weight:600;">
+
+                        Login
+                    </a>
+
+                    <a href="/Account/Register"
+                           style="background:#1F2937;
+                        color:white;
+                        padding:6px 14px;
+                        border-radius:8px;
+                        text-decoration:none;
+                        font-weight:600;">
+
+                        Sign Up
+                    </a>
+
+                </div>
+
+            </div>
+        </nav> *@
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+@*     <footer class="border-top footer text-muted">
+        <div class="container">
+            <span style="color:white;">
+                &copy; 2026 - WebNest -
+            </span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy" style="color:white;">
+                Privacy
+            </a>
+        </div>
+    </footer> *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

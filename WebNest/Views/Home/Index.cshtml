@@ -1,0 +1,237 @@
+﻿@{
+    ViewData["Title"] = "WebNest Home";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-blue: #1E3A8A;
+        --primary-indigo: #3B5BDB;
+        --primary-purple: #7C3AED;
+        --accent-teal: #2CB1A1;
+        --accent-light-purple: #A78BFA;
+        --accent-blue-light: #60A5FA;
+        --white: #FFFFFF;
+        --light-gray: #F5F5F5;
+        --text-dark: #1F2937;
+        --gradient-main: linear-gradient(90deg, #1E3A8A, #3B5BDB, #7C3AED);
+    }
+
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: var(--light-gray);
+        color: var(--text-dark);
+    }
+
+    /* NAVBAR */
+    .navbar {
+        background: transparent;
+        position: absolute;
+        width: 100%;
+        z-index: 1000;
+    }
+
+    .navbar-brand {
+        color: var(--white) !important;
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+
+    .nav-link {
+        color: var(--white) !important;
+        margin-left: 15px;
+    }
+
+        .nav-link:hover {
+            color: var(--accent-blue-light) !important;
+        }
+
+    /* HERO */
+    .hero {
+        background: var(--gradient-main);
+        color: white;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-top: 15px;
+        }
+
+    .btn-main {
+        background: white;
+        color: var(--primary-indigo);
+        border-radius: 30px;
+        padding: 10px 25px;
+        font-weight: 600;
+    }
+
+        .btn-main:hover {
+            background: var(--accent-blue-light);
+            color: white;
+        }
+
+    .section {
+        padding: 80px 0;
+    }
+
+    .card {
+        border: none;
+        border-radius: 15px;
+        transition: 0.3s;
+    }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+    .icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+        color: var(--primary-indigo);
+    }
+
+    .footer {
+        background: var(--primary-blue);
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+
+
+</style>
+
+
+<nav style="background: linear-gradient(90deg, #EAF0FF, #F3F4FF, #F5F3FF);
+    padding: 10px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+
+    <div style="max-width:1200px; margin:auto; display:flex; align-items:center; justify-content:space-between; padding:0 20px;">
+
+        <!-- LEFT: LOGO -->
+        <a href="/" style="display:flex; align-items:center; text-decoration:none;">
+            <img src="~/images/WebNest Logo.png" alt="WebNest Logo"
+                 style="height:60px;">
+        </a>
+
+
+        <!-- RIGHT: AUTH BUTTONS -->
+        <div style="display:flex; gap:10px; align-items:center;">
+
+            <a href="/Login/AdminLogin"
+                   style="background:#D1D5DB;
+                color:#1E3A8A;
+                padding:6px 14px;
+                border-radius:8px;
+                text-decoration:none;
+                font-weight:600;">
+
+                Admin Login
+            </a>
+
+            &nbsp;&nbsp;&nbsp;&nbsp;
+
+            <a href="/Login/Login"
+                   style="background:#D1D5DB;
+                color:#1E3A8A;
+                padding:6px 14px;
+                border-radius:8px;
+                text-decoration:none;
+                font-weight:600;">
+
+                Login
+            </a>
+
+            <a href="/Login/Signup"
+                   style="background:#D1D5DB;
+                color:#1E3A8A;
+                padding:6px 14px;
+                border-radius:8px;
+                text-decoration:none;
+                font-weight:600;">
+
+                Signup
+            </a>
+
+          
+
+        </div>
+
+    </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <div class="animate__animated animate__fadeIn">
+        <h1>Welcome to WebNest</h1>
+        <h2>Start Managing Your Business Today</h2>
+        <a href="/Login/Login" class="btn btn-main mt-3">Login to Your Portal</a>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section text-center">
+    <div class="container">
+        <h2 class="mb-5">What WebNest Offers</h2>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="card p-4 animate__animated animate__fadeInUp">
+                    <div class="icon">🌐</div>
+                    <h5>Multi-User System</h5>
+                    <p>Each company gets its own secure login and private dashboard.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card p-4 animate__animated animate__fadeInUp">
+                    <div class="icon">⚙️</div>
+                    <h5>Manage Your Website</h5>
+                    <p>Users can control content, orders, and data from one place.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card p-4 animate__animated animate__fadeInUp">
+                    <div class="icon">🔐</div>
+                    <h5>Secure Access</h5>
+                    <p>Role-based login system with protected user data.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- LIMIT INFO -->
+<section class="section text-center" style="background:#fff;">
+    <div class="container">
+        <h2 class="mb-4">Limited Access Platform</h2>
+        <p style="max-width:600px;margin:auto;">
+            WebNest is designed for exclusive use, supporting only 1–5 companies to ensure high performance, security, and dedicated resources.
+        </p>
+    </div>
+</section>
+
+
+<!-- FOOTER -->
+<div class="footer">
+    <p>© 2026 WebNest Platform</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+

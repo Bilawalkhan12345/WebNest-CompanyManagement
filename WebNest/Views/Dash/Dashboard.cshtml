@@ -1,0 +1,367 @@
+﻿@{
+    ViewData["Title"] = "AutoDoc by AMMS";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #1A1A1A;
+        color: #E5E7EB;
+    }
+
+    /* NAVBAR */
+    .navbar {
+        background-color: #1A1A1A;
+    }
+
+    .navbar-brand {
+        font-weight: bold;
+        color: #FFFFFF !important;
+        letter-spacing: 1px;
+    }
+
+    .nav-link {
+        color: #E5E7EB !important;
+    }
+
+        .nav-link:hover {
+            color: #E50914 !important;
+        }
+
+    /* HERO */
+    .hero {
+        position: relative;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+        .hero video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(35%);
+        }
+
+    .hero-content {
+        position: relative;
+        text-align: center;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .brand-title {
+        font-size: 4rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+    }
+
+    .brand-sub {
+        font-size: 1.5rem;
+        color: #9CA3AF;
+        margin-bottom: 20px;
+    }
+
+    .btn-custom {
+        background: linear-gradient(90deg, #E50914, #FF3B3F);
+        color: #fff;
+        border: none;
+    }
+
+        .btn-custom:hover {
+            opacity: 0.9;
+        }
+
+    .section {
+        padding: 80px 0;
+    }
+
+    /* CARDS */
+    .card {
+        background-color: #262626;
+        border: none;
+        color: #E5E7EB;
+        transition: 0.3s;
+    }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 25px rgba(229,9,20,0.4);
+        }
+
+    h2 {
+        color: #FFFFFF;
+        font-weight: bold;
+    }
+
+    footer {
+        background-color: #1A1A1A;
+        border-top: 1px solid #333;
+    }
+
+    /* FEATURES */
+    .feature-box {
+        background: #262626;
+        padding: 15px 20px;
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(229,9,20,0.4);
+        }
+
+        .feature-box h5 {
+            color: #FFFFFF;
+        }
+
+        .feature-box p {
+            color: #9CA3AF;
+        }
+
+    .bullet {
+        font-size: 2rem;
+        color: #E50914;
+        margin-right: 15px;
+    }
+
+    /* CONTACT */
+    .contact-box {
+        background: #262626;
+        padding: 30px 20px;
+        border-radius: 12px;
+        transition: 0.3s;
+        color: #E5E7EB;
+    }
+
+        .contact-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 20px rgba(229,9,20,0.4);
+        }
+
+        .contact-box .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #E50914;
+        }
+
+        .contact-box p {
+            color: #9CA3AF;
+        }
+</style>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/Dash/Dashboard">
+            <img src="~/images/AutoDoc Logo.png" alt="AutoDoc Logo" style="height:100px;">
+        </a>
+
+        <button class="navbar-toggler bg-light" data-bs-toggle="collapse" data-bs-target="#menu"></button>
+
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#products">Products</a></li>
+                <li class="nav-item"><a class="nav-link" href="/Home/Index">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <video autoplay muted loop>
+        <source src="~/videos/auto-bg.mp4" type="video/mp4">
+    </video>
+
+    <div class="container hero-content">
+        <div class="brand-title">
+            <span style="color:red;">Auto</span><span style="color:white;">Doc</span>
+        </div>
+
+        <div class="brand-sub">by AMMS</div>
+
+        <p class="lead mb-4">
+            Advanced Automotive Cleaning Solutions Engineered for Power, Performance, and Precision
+        </p>
+
+        <a href="#contact" class="btn btn-custom btn-lg">Order Now</a>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section">
+    <div class="container">
+
+        <!-- Heading -->
+        <div class="text-center mb-5">
+            <h2>About AMMS</h2>
+            <p style="max-width:700px;margin:auto;color:#9CA3AF;">
+                Delivering high-performance automotive chemical solutions through innovation, precision, and reliability.
+            </p>
+        </div>
+
+        <div class="row align-items-center g-5">
+
+            <!-- Left Content -->
+            <div class="col-md-6">
+                <p style="font-size:1.1rem; color:#D1D5DB;">
+                    AMMS specializes in advanced automotive cleaning chemicals under the
+                    <strong>AutoDoc</strong> brand. Our products are designed to meet the real-world
+                    demands of cars, workshops, and industrial vehicle maintenance.
+                </p>
+
+                <p style="font-size:1.1rem; color:#D1D5DB;">
+                    We manufacture powerful solutions such as <strong>Catalytic Converter Cleaner</strong>
+                    and <strong>Heavy Duty Degreaser</strong>, built to remove carbon deposits, grease, oil,
+                    and stubborn contaminants from engine components and critical systems.
+                </p>
+
+                <p style="font-size:1.1rem; color:#D1D5DB;">
+                    Our solutions are widely used in auto cars, commercial vehicles, and mechanical workshops
+                    for engine cleaning, catalytic system maintenance, and overall performance improvement.
+                </p>
+            </div>
+
+            <!-- Right Features -->
+            <div class="col-md-6">
+
+                <div class="feature-box d-flex align-items-start mb-4">
+                    <div class="bullet">•</div>
+                    <div>
+                        <h5>Catalytic System Cleaning</h5>
+                        <p>Removes carbon buildup and improves emission efficiency.</p>
+                    </div>
+                </div>
+
+                <div class="feature-box d-flex align-items-start mb-4">
+                    <div class="bullet">•</div>
+                    <div>
+                        <h5>Heavy Duty Degreasing</h5>
+                        <p>Breaks down oil, grease, and dirt from engines and surfaces.</p>
+                    </div>
+                </div>
+
+                <div class="feature-box d-flex align-items-start mb-4">
+                    <div class="bullet">•</div>
+                    <div>
+                        <h5>Multi-Vehicle Application</h5>
+                        <p>Suitable for cars, trucks, and industrial vehicles.</p>
+                    </div>
+                </div>
+
+                <div class="feature-box d-flex align-items-start mb-4">
+                    <div class="bullet">•</div>
+                    <div>
+                        <h5>Workshop & Professional Use</h5>
+                        <p>Trusted by mechanics and automotive service providers.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products" class="section">
+    <div class="container">
+        <h2 class="text-center mb-5">Our Products</h2>
+
+        <div class="row g-4">
+
+            <!-- Degreaser -->
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h4 style="color:#E50914;">Heavy Duty Degreaser</h4>
+
+                    <p>
+                        A powerful multi-purpose cleaning solution designed to remove
+                        tough grease, oil, and dirt from engines and automotive surfaces.
+                    </p>
+
+                    <ul>
+                        <li>Removes heavy grease and oil deposits</li>
+                        <li>Safe for engine parts, metal, rubber, and plastic</li>
+                        <li>Fast-acting formula for quick cleaning</li>
+                        <li>Ideal for workshops and car wash stations</li>
+                    </ul>
+
+                    <p style="color:#9CA3AF;">
+                        <strong>Use Cases:</strong> Engine bays, mechanical parts, industrial equipment
+                    </p>
+                </div>
+            </div>
+
+            <!-- Catalytic Cleaner -->
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h4 style="color:#E50914;">Catalytic Converter Cleaner</h4>
+
+                    <p>
+                        Advanced formula developed to clean and restore catalytic converters,
+                        improving engine efficiency and reducing harmful emissions.
+                    </p>
+
+                    <ul>
+                        <li>Removes carbon buildup and deposits</li>
+                        <li>Improves fuel efficiency and engine performance</li>
+                        <li>Helps reduce exhaust emissions</li>
+                        <li>Easy to use with long-lasting effect</li>
+                    </ul>
+
+                    <p style="color:#9CA3AF;">
+                        <strong>Use Cases:</strong> Cars, trucks, and emission system maintenance
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section">
+    <div class="container text-center">
+        <h2>Contact Us</h2>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="contact-box">
+                    <div class="icon">📞</div>
+                    <p>+92 310 5325378</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="contact-box">
+                    <div class="icon">✉️</div>
+                    <p>imudasirabal87@gmail.com</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="contact-box">
+                    <div class="icon">📍</div>
+                    <p>Islamabad, Pakistan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="text-center p-3">
+    <p>© 2026 AMMS | AutoDoc</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

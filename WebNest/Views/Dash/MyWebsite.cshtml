@@ -1,0 +1,1985 @@
+﻿@* @{
+    ViewData["Title"] = "My Website - WebNest";
+    var userName  = Context.Session.GetString("UserName");
+    var userEmail = Context.Session.GetString("UserEmail");
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    :root {
+        --primary-blue:   #1E3A8A;
+        --primary-indigo: #3B5BDB;
+        --primary-purple: #7C3AED;
+        --gradient-main:  linear-gradient(90deg, #1E3A8A, #3B5BDB, #7C3AED);
+    }
+
+
+        /* ADD THIS */
+    #addCompanyPanel {
+        max-width: 800px;
+        margin: 0 auto;
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transition: max-height 0.55s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
+    }
+
+    #addCompanyPanel.open {
+        max-height: 800px;
+        opacity: 1;
+        margin-bottom: 24px;
+    }
+
+
+
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: var(--gradient-main);
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+
+    .welcome-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin: 0 auto 30px auto;
+        max-width: 800px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+
+    .btn-action {
+        background: var(--primary-indigo);
+        color: white;
+        border-radius: 30px;
+        padding: 10px 30px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    .btn-action:hover { background: var(--primary-purple); color: white; }
+
+    .slots-container {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .company-slot {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .slot-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+    }
+
+    .slot-header:hover { background: #f5f7ff; }
+
+    .slot-header-left { display: flex; align-items: center; gap: 14px; }
+
+    .slot-number {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: var(--gradient-main);
+        color: white; font-weight: 700; font-size: 15px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .slot-title    { font-weight: 600; color: var(--primary-blue); font-size: 15px; }
+    .slot-subtitle { font-size: 12px; color: #999; margin-top: 2px; }
+
+    .slot-header-right { display: flex; align-items: center; gap: 10px; }
+
+    .slot-arrow {
+        font-size: 20px;
+        color: var(--primary-indigo);
+        transition: transform 0.3s ease;
+    }
+
+    .slot-arrow.open { transform: rotate(180deg); }
+
+    .slot-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+        border-top: 0px solid #eee;
+    }
+
+    .slot-body.open { max-height: 700px; border-top: 1px solid #eee; }
+
+    .slot-body-inner { padding: 20px 24px 24px; }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+
+    .detail-label { color: #888; font-weight: 500; min-width: 140px; }
+    .detail-value { color: var(--primary-blue); font-weight: 600; text-align: right; }
+
+    .limit-note {
+        text-align: center; color: white;
+        font-size: 13px; margin-top: 16px; opacity: 0.85;
+    }
+
+    .btn-edit-slot {
+        background: #3B82F6; color: white;
+        border: none; border-radius: 8px;
+        padding: 6px 14px; font-size: 13px;
+        font-weight: 600; cursor: pointer;
+    }
+
+    .btn-delete-slot {
+        background: #ef4444; color: white;
+        border: none; border-radius: 8px;
+        padding: 6px 14px; font-size: 13px;
+        font-weight: 600; cursor: pointer;
+    }
+
+    /* ── Confirm / Edit Modals ── */
+    .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.5); z-index: 9999;
+        align-items: center; justify-content: center;
+    }
+
+    .modal-box {
+        background: white; border-radius: 18px;
+        padding: 32px 28px; width: 90%; max-width: 440px;
+        text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .modal-icon  { font-size: 42px; margin-bottom: 12px; }
+    .modal-title { font-size: 20px; font-weight: 700; color: #1E3A8A; margin-bottom: 8px; }
+    .modal-msg   { color: #555; font-size: 15px; margin-bottom: 16px; line-height: 1.5; }
+
+    .modal-name {
+        font-weight: 700; color: #1E3A8A;
+        background: #eef2ff; padding: 2px 12px;
+        border-radius: 8px; display: inline-block; margin-bottom: 16px;
+    }
+
+    .modal-btns { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+
+    .modal-btns button {
+        padding: 10px 28px; border-radius: 10px;
+        font-weight: 600; font-size: 15px; cursor: pointer; border: none;
+    }
+
+    .btn-cancel  { background: #f3f4f6; color: #333; }
+    .btn-danger  { background: #ef4444; color: white; }
+    .btn-primary { background: #3B82F6; color: white; }
+
+    /* Edit modal wider */
+    .edit-modal-box {
+        background: white; border-radius: 18px;
+        padding: 30px; width: 90%; max-width: 550px;
+        max-height: 90vh; overflow-y: auto;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .edit-field label {
+        font-weight: 600; font-size: 13px; color: #555; display: block; margin-bottom: 4px;
+    }
+
+    .edit-field input {
+        width: 100%; padding: 10px; border: 1px solid #ddd;
+        border-radius: 8px; box-sizing: border-box; font-size: 14px;
+    }
+</style>
+
+
+
+
+
+<!-- ═══════════════════════════════════
+     ADD COMPANY SLIDE-DOWN FORM
+════════════════════════════════════ -->
+<div id="addCompanyPanel">
+
+
+    <div style="
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    ">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div>
+                <h3 style="color:#1E3A8A; margin:0; font-weight:700;">Add New Company</h3>
+                <p style="color:#888; font-size:13px; margin:4px 0 0;">Fill in the details below</p>
+            </div>
+            <button onclick="toggleAddForm()"
+                    style="background:none; border:none; font-size:22px;
+                           cursor:pointer; color:#999; line-height:1;">✕</button>
+        </div>
+
+        <!-- Error box -->
+        <div id="addCompanyError"
+             style="display:none; background:#fef2f2; color:#dc2626;
+                    border-radius:8px; padding:10px 14px;
+                    font-size:13px; margin-bottom:16px;">
+        </div>
+
+        <!-- Form Grid -->
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+
+            <div class="edit-field">
+                <label>Client Name</label>
+                <input type="text" id="add-clientname" placeholder="Client Name" />
+            </div>
+
+            <div class="edit-field">
+                <label>Phone</label>
+                <input type="text" id="add-phone" placeholder="Phone" />
+            </div>
+
+            <div class="edit-field">
+                <label>City</label>
+                <input type="text" id="add-city" placeholder="City" />
+            </div>
+
+            <div class="edit-field">
+                <label>Address</label>
+                <input type="text" id="add-address" placeholder="Address" />
+            </div>
+
+            <div class="edit-field">
+                <label>Company Name</label>
+                <input type="text" id="add-companyname" placeholder="Company Name" />
+            </div>
+
+            <div class="edit-field">
+                <label>Company Type</label>
+                <select id="add-companytype"
+                        style="width:100%; padding:10px; border:1px solid #ddd;
+                               border-radius:8px; font-size:14px; color:#333;">
+                    <option value="">-- Select Type --</option>
+                    <option value="IT">IT (Software / Tech)</option>
+                    <option value="E-commerce">E-commerce</option>
+                    <option value="Education">Education</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Finance">Finance / Banking</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Retail">Retail / Shopping</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Construction">Construction</option>
+                    <option value="Agricultural">Agricultural</option>
+                    <option value="Industrial">Industrial</option>
+                    <option value="Transport">Transport / Logistics</option>
+                    <option value="Media">Media / Marketing</option>
+                    <option value="Government">Government</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="edit-field">
+                <label>Employees</label>
+                <input type="text" id="add-employees" placeholder="Number of Employees" />
+            </div>
+
+            <div class="edit-field">
+                <label>User ID</label>
+                <input type="text" id="add-userid" placeholder="User ID" />
+            </div>
+
+        </div>
+
+        <!-- Buttons -->
+        <div style="display:flex; gap:10px; margin-top:24px; justify-content:flex-end;">
+            <button onclick="toggleAddForm()"
+                    style="padding:10px 24px; border-radius:10px; border:1px solid #ddd;
+                           font-weight:600; cursor:pointer; background:#f3f4f6; color:#333;">
+                Cancel
+            </button>
+            <button id="addCompanyBtn" onclick="submitAddCompany()"
+                    style="padding:10px 24px; border-radius:10px; border:none;
+                           font-weight:600; cursor:pointer;
+                           background: var(--gradient-main); color:white;">
+                ＋ Add Company
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<!-- Welcome Card -->
+<div class="welcome-card">
+    <h2 style="color: var(--primary-indigo); font-weight: 700;">Welcome, @userName! 👋</h2>
+    <p style="color: #666; margin-top: 6px;">Email: @userEmail</p>
+    <p style="color: #999; font-size: 13px; margin-top: 4px;">
+        You have <strong style="color: var(--primary-indigo);">@ViewBag.CompanyCount</strong> / 5 companies registered.
+    </p>
+
+    @if (ViewBag.CompanyCount < 5)
+    {
+            <button class="btn-action" onclick="toggleAddForm()">+ Add Company</button>   
+    }
+    else
+    {
+        <button class="btn-action" style="background:#aaa; cursor:not-allowed;" disabled>
+            Max 5 Companies Reached
+        </button>
+    }
+
+    <a href="/Login/Login" class="btn-action" style="margin-left:10px;">Logout</a>
+</div>
+
+
+<!-- Company Slots -->
+@if (ViewBag.Companies != null && ViewBag.CompanyCount > 0)
+{
+    <div class="slots-container">
+        @{ int counter = 1; }
+
+        @foreach (var company in ViewBag.Companies)
+        {
+            <div class="company-slot">
+                <div class="slot-header" onclick="toggleSlot(@counter)">
+                    <div class="slot-header-left">
+                        <div class="slot-number">@counter</div>
+                        <div>
+                            <div class="slot-title">@company.CompanyName</div>
+                            <div class="slot-subtitle">@company.CompanyType &nbsp;|&nbsp; @company.City</div>
+                        </div>
+                    </div>
+                    <div class="slot-header-right">
+                        <button class="btn-edit-slot"
+                                onclick="event.stopPropagation(); openEdit(
+                                    @company.RegId,
+                                    '@company.ClientName',
+                                    '@company.Phone',
+                                    '@company.Address',
+                                    '@company.City',
+                                    '@company.CompanyName',
+                                    '@company.CompanyType',
+                                    '@company.Employees',
+                                    '@company.UserId')">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn-delete-slot"
+                                onclick="event.stopPropagation();
+                                         showDelete(@company.RegId, '@company.CompanyName')">
+                            🗑️ Delete
+                        </button>
+                        <span class="slot-arrow" id="arrow-@counter">&#9662;</span>
+                    </div>
+                </div>
+
+                <div class="slot-body" id="body-@counter">
+                    <div class="slot-body-inner">
+                        <div class="detail-row">
+                            <span class="detail-label">Client Name</span>
+                            <span class="detail-value">@company.ClientName</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Phone</span>
+                            <span class="detail-value">@company.Phone</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Address</span>
+                            <span class="detail-value">@company.Address</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">City</span>
+                            <span class="detail-value">@company.City</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Company Name</span>
+                            <span class="detail-value">@company.CompanyName</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Company Type</span>
+                            <span class="detail-value">@company.CompanyType</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Employees</span>
+                            <span class="detail-value">@company.Employees</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">User ID</span>
+                            <span class="detail-value">@company.UserId</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            counter++;
+        }
+    </div>
+
+    <p class="limit-note">&#9432; Maximum 5 companies allowed per account</p>
+}
+
+
+
+
+<!-- ═══════════════════════════════════
+     ADD COMPANY SLIDE-DOWN FORM
+════════════════════════════════════ -->
+<div id="addCompanyPanel">
+
+
+    <div style="
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    ">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div>
+                <h3 style="color:#1E3A8A; margin:0; font-weight:700;">Add New Company</h3>
+                <p style="color:#888; font-size:13px; margin:4px 0 0;">Fill in the details below</p>
+            </div>
+            <button onclick="toggleAddForm()"
+                    style="background:none; border:none; font-size:22px;
+                           cursor:pointer; color:#999; line-height:1;">✕</button>
+        </div>
+
+        <!-- Error box -->
+        <div id="addCompanyError"
+             style="display:none; background:#fef2f2; color:#dc2626;
+                    border-radius:8px; padding:10px 14px;
+                    font-size:13px; margin-bottom:16px;">
+        </div>
+
+        <!-- Form Grid -->
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+
+            <div class="edit-field">
+                <label>Client Name</label>
+                <input type="text" id="add-clientname" placeholder="Client Name" />
+            </div>
+
+            <div class="edit-field">
+                <label>Phone</label>
+                <input type="text" id="add-phone" placeholder="Phone" />
+            </div>
+
+            <div class="edit-field">
+                <label>City</label>
+                <input type="text" id="add-city" placeholder="City" />
+            </div>
+
+            <div class="edit-field">
+                <label>Address</label>
+                <input type="text" id="add-address" placeholder="Address" />
+            </div>
+
+            <div class="edit-field">
+                <label>Company Name</label>
+                <input type="text" id="add-companyname" placeholder="Company Name" />
+            </div>
+
+            <div class="edit-field">
+                <label>Company Type</label>
+                <select id="add-companytype"
+                        style="width:100%; padding:10px; border:1px solid #ddd;
+                               border-radius:8px; font-size:14px; color:#333;">
+                    <option value="">-- Select Type --</option>
+                    <option value="IT">IT (Software / Tech)</option>
+                    <option value="E-commerce">E-commerce</option>
+                    <option value="Education">Education</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Finance">Finance / Banking</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Retail">Retail / Shopping</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Construction">Construction</option>
+                    <option value="Agricultural">Agricultural</option>
+                    <option value="Industrial">Industrial</option>
+                    <option value="Transport">Transport / Logistics</option>
+                    <option value="Media">Media / Marketing</option>
+                    <option value="Government">Government</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="edit-field">
+                <label>Employees</label>
+                <input type="text" id="add-employees" placeholder="Number of Employees" />
+            </div>
+
+            <div class="edit-field">
+                <label>User ID</label>
+                <input type="text" id="add-userid" placeholder="User ID" />
+            </div>
+
+        </div>
+
+        <!-- Buttons -->
+        <div style="display:flex; gap:10px; margin-top:24px; justify-content:flex-end;">
+            <button onclick="toggleAddForm()"
+                    style="padding:10px 24px; border-radius:10px; border:1px solid #ddd;
+                           font-weight:600; cursor:pointer; background:#f3f4f6; color:#333;">
+                Cancel
+            </button>
+            <button id="addCompanyBtn" onclick="submitAddCompany()"
+                    style="padding:10px 24px; border-radius:10px; border:none;
+                           font-weight:600; cursor:pointer;
+                           background: var(--gradient-main); color:white;">
+                ＋ Add Company
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- ═══════════════════════════════════
+     EDIT MODAL
+════════════════════════════════════ -->
+<div id="editModal" class="modal-overlay">
+    <div class="edit-modal-box">
+        <h3 style="color:#1E3A8A; margin-bottom:4px;">Edit Company</h3>
+        <p id="edit-subtitle" style="color:#888; font-size:13px; margin-bottom:20px;"></p>
+
+        <form method="post" action="/Dash/UpdateCompany" onsubmit="return confirmSave(event)">
+            <input type="hidden" id="edit-regid"   name="RegId" />
+            <input type="hidden" id="edit-userid"  name="UserId" />
+
+            <div style="display:grid; gap:14px;">
+                <div class="edit-field">
+                    <label>Client Name</label>
+                    <input type="text"  id="edit-clientname"  name="ClientName" />
+                </div>
+               
+                <div class="edit-field">
+                    <label>Phone</label>
+                    <input type="text"  id="edit-phone"       name="Phone" />
+                </div>
+                <div class="edit-field">
+                    <label>Address</label>
+                    <input type="text"  id="edit-address"     name="Address" />
+                </div>
+                <div class="edit-field">
+                    <label>City</label>
+                    <input type="text"  id="edit-city"        name="City" />
+                </div>
+                <div class="edit-field">
+                    <label>Company Name</label>
+                    <input type="text"  id="edit-companyname" name="CompanyName" />
+                </div>
+                <div class="edit-field">
+                    <label>Company Type</label>
+                    <input type="text"  id="edit-companytype" name="CompanyType" />
+                </div>
+                <div class="edit-field">
+                    <label>Employees</label>
+                    <input type="text"  id="edit-employees"   name="Employees" />
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:24px; justify-content:flex-end;">
+                <button type="button" class="btn-cancel"
+                        onclick="closeModal('editModal')"
+                        style="padding:10px 20px; border-radius:10px;
+                               border:1px solid #ddd; font-weight:600; cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary"
+                        style="padding:10px 20px; border-radius:10px;
+                               border:none; font-weight:600; cursor:pointer;">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════
+     SAVE CONFIRM MODAL
+════════════════════════════════════ -->
+<div id="saveModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-icon">💾</div>
+        <div class="modal-title">Save Changes?</div>
+        <div class="modal-msg">You are about to update:</div>
+        <div class="modal-name" id="save-company-name"></div>
+        <div class="modal-msg">Are you sure you want to save these changes?</div>
+        <div class="modal-btns">
+            <button class="btn-cancel"  onclick="closeModal('saveModal')">Cancel</button>
+            <button class="btn-primary" onclick="submitSave()">Yes, Save</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════
+     DELETE CONFIRM MODAL
+════════════════════════════════════ -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-icon">🗑️</div>
+        <div class="modal-title">Delete Company?</div>
+        <div class="modal-msg">You are about to permanently delete:</div>
+        <div class="modal-name" id="delete-company-name"></div>
+        <div class="modal-msg">This cannot be undone.</div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+            <button class="btn-danger" onclick="submitDelete()">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Hidden forms -->
+<form id="deleteForm" method="post" action="/Dash/DeleteCompany" style="display:none;">
+    <input type="hidden" id="delete-id" name="id" />
+</form>
+
+<form id="saveForm" method="post" action="/Dash/UpdateCompany" style="display:none;">
+    <input type="hidden" name="RegId"       id="sf-regid" />
+    <input type="hidden" name="ClientName"  id="sf-clientname" />
+    <input type="hidden" name="Phone"       id="sf-phone" />
+    <input type="hidden" name="Address"     id="sf-address" />
+    <input type="hidden" name="City"        id="sf-city" />
+    <input type="hidden" name="CompanyName" id="sf-companyname" />
+    <input type="hidden" name="CompanyType" id="sf-companytype" />
+    <input type="hidden" name="Employees"   id="sf-employees" />
+    <input type="hidden" name="UserId"      id="sf-userid" />
+</form>
+
+
+<script>
+    /* ── Accordion ── */
+    function toggleSlot(index) {
+        const body  = document.getElementById('body-'  + index);
+        const arrow = document.getElementById('arrow-' + index);
+        const isOpen = body.classList.contains('open');
+
+        document.querySelectorAll('.slot-body').forEach(b  => b.classList.remove('open'));
+        document.querySelectorAll('.slot-arrow').forEach(a => a.classList.remove('open'));
+
+        if (!isOpen) {
+            body.classList.add('open');
+            arrow.classList.add('open');
+        }
+    }
+
+    /* ── Modal helpers ── */
+    function openModal(id)  { document.getElementById(id).style.display = "flex"; }
+    function closeModal(id) { document.getElementById(id).style.display = "none"; }
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) closeModal(this.id);
+        });
+    });
+
+    /* ── Edit ── */
+    function openEdit(regId, clientName,  phone, address, city,
+                      companyName, companyType, employees, userId) {
+        document.getElementById('edit-regid').value       = regId;
+        document.getElementById('edit-clientname').value  = clientName;
+        document.getElementById('edit-phone').value       = phone;
+        document.getElementById('edit-address').value     = address;
+        document.getElementById('edit-city').value        = city;
+        document.getElementById('edit-companyname').value = companyName;
+        document.getElementById('edit-companytype').value = companyType;
+        document.getElementById('edit-employees').value   = employees;
+        document.getElementById('edit-userid').value      = userId;
+        document.getElementById('edit-subtitle').textContent = 'Editing: ' + companyName;
+        openModal('editModal');
+    }
+
+    /* ── Save confirm ── */
+    function confirmSave(e) {
+        e.preventDefault();
+        const name = document.getElementById('edit-companyname').value;
+        document.getElementById('save-company-name').textContent = name;
+
+        document.getElementById('sf-regid').value       = document.getElementById('edit-regid').value;
+        document.getElementById('sf-clientname').value  = document.getElementById('edit-clientname').value;
+        document.getElementById('sf-phone').value       = document.getElementById('edit-phone').value;
+        document.getElementById('sf-address').value     = document.getElementById('edit-address').value;
+        document.getElementById('sf-city').value        = document.getElementById('edit-city').value;
+        document.getElementById('sf-companyname').value = name;
+        document.getElementById('sf-companytype').value = document.getElementById('edit-companytype').value;
+        document.getElementById('sf-employees').value   = document.getElementById('edit-employees').value;
+        document.getElementById('sf-userid').value      = document.getElementById('edit-userid').value;
+
+        closeModal('editModal');
+        openModal('saveModal');
+        return false;
+    }
+
+    function submitSave() {
+        document.getElementById('saveForm').submit();
+    }
+
+    /* ── Delete ── */
+    function showDelete(id, name) {
+        document.getElementById('delete-id').value = id;
+        document.getElementById('delete-company-name').textContent = name;
+        openModal('deleteModal');
+    }
+
+    function submitDelete() {
+        document.getElementById('deleteForm').submit();
+    }
+
+    /* ── SweetAlert toasts ── */
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <text>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '@TempData["SuccessMessage"]',
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+        });
+        </text>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <text>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: '@TempData["ErrorMessage"]',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        </text>
+    }
+
+
+
+
+
+
+let addFormOpen = false;
+
+function toggleAddForm() {
+    const panel = document.getElementById('addCompanyPanel');
+    addFormOpen = !addFormOpen;
+
+    if (addFormOpen) {
+        panel.classList.add('open');
+        // scroll to very top so user sees it slide in
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        panel.classList.remove('open');
+        clearAddForm();
+        document.getElementById('addCompanyError').style.display = 'none';
+    }
+}
+
+function submitAddCompany() {
+    const btn      = document.getElementById('addCompanyBtn');
+    const errorBox = document.getElementById('addCompanyError');
+
+    const clientName  = document.getElementById('add-clientname').value.trim();
+    const phone       = document.getElementById('add-phone').value.trim();
+    const city        = document.getElementById('add-city').value.trim();
+    const address     = document.getElementById('add-address').value.trim();
+    const companyName = document.getElementById('add-companyname').value.trim();
+    const companyType = document.getElementById('add-companytype').value;
+    const employees   = document.getElementById('add-employees').value.trim();
+    const userId      = document.getElementById('add-userid').value.trim();
+
+    if (!clientName || !phone || !city || !address || !companyName || !companyType || !employees) {
+        errorBox.textContent = '⚠️ Please fill in all required fields.';
+        errorBox.style.display = 'block';
+        return;
+    }
+
+    errorBox.style.display = 'none';
+    btn.disabled    = true;
+    btn.textContent = 'Adding...';
+
+    const formData = new FormData();
+    formData.append('ClientName',  clientName);
+    formData.append('Phone',       phone);
+    formData.append('City',        city);
+    formData.append('Address',     address);
+    formData.append('CompanyName', companyName);
+    formData.append('CompanyType', companyType);
+    formData.append('Employees',   employees);
+    formData.append('UserId',      userId);
+
+    fetch('/Registration/Add', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected || response.ok) {
+
+            // 1. Slide the form back up first
+            toggleAddForm();
+
+            // 2. Then show toast and reload
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Company added successfully!',
+                timer: 1500,
+                showConfirmButton: false,
+                timerProgressBar: true
+            }).then(() => location.reload());
+
+        } else {
+            errorBox.textContent = '❌ Something went wrong. Please try again.';
+            errorBox.style.display = 'block';
+        }
+    })
+    .catch(() => {
+        errorBox.textContent = '❌ Network error. Please try again.';
+        errorBox.style.display = 'block';
+    })
+    .finally(() => {
+        btn.disabled    = false;
+        btn.textContent = '＋ Add Company';
+    });
+}
+
+function clearAddForm() {
+    ['add-clientname','add-phone','add-city','add-address',
+     'add-companyname','add-companytype','add-employees','add-userid']
+        .forEach(id => document.getElementById(id).value = '');
+}
+
+</script> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@{
+    ViewData["Title"] = "My Website - WebNest";
+    var userName  = Context.Session.GetString("UserName");
+    var userEmail = Context.Session.GetString("UserEmail");
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+    :root {
+        --primary-blue:   #1E3A8A;
+        --primary-indigo: #3B5BDB;
+        --primary-purple: #7C3AED;
+        --gradient-main:  linear-gradient(90deg, #1E3A8A, #3B5BDB, #7C3AED);
+    }
+
+    #addCompanyPanel {
+        max-width: 800px;
+        margin: 0 auto;
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transition: max-height 0.55s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
+    }
+
+    #addCompanyPanel.open {
+        max-height: 900px;
+        opacity: 1;
+        margin-bottom: 24px;
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: var(--gradient-main);
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+
+    .welcome-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin: 0 auto 30px auto;
+        max-width: 800px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+
+    .btn-action {
+        background: var(--primary-indigo);
+        color: white;
+        border-radius: 30px;
+        padding: 10px 30px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    .btn-action:hover { background: var(--primary-purple); color: white; }
+
+    .slots-container {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .company-slot {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .slot-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+    }
+
+    .slot-header:hover { background: #f5f7ff; }
+
+    .slot-header-left { display: flex; align-items: center; gap: 14px; }
+
+    /* Company logo in slot header */
+    .slot-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid #e0e7ff;
+        flex-shrink: 0;
+        background: #f3f4f6;
+    }
+
+    .slot-logo-placeholder {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: var(--gradient-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+
+
+
+
+    .slot-logo-wrap {
+    width: 44px; height: 44px;
+    border-radius: 10px; overflow: hidden;
+    flex-shrink: 0; background: var(--gradient-main);
+    display: flex; align-items: center;
+    justify-content: center; font-size: 20px;
+    border: 2px solid #e0e7ff;
+}
+.slot-logo-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+}
+.detail-logo-img {
+    width: 64px; height: 64px;
+    border-radius: 12px; object-fit: cover;
+    border: 2px solid #e0e7ff;
+}
+.btn-print-pdf {
+    display: flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #1E3A8A, #3B5BDB);
+    color: white; border: none; border-radius: 10px;
+    padding: 10px 22px; font-size: 14px; font-weight: 600;
+    cursor: pointer; margin-top: 20px; width: 100%;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(59,91,219,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-print-pdf:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59,91,219,0.4);
+}
+
+
+
+
+
+
+    .slot-number {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: var(--gradient-main);
+        color: white; font-weight: 700; font-size: 15px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .slot-title    { font-weight: 600; color: var(--primary-blue); font-size: 15px; }
+    .slot-subtitle { font-size: 12px; color: #999; margin-top: 2px; }
+
+    .slot-header-right { display: flex; align-items: center; gap: 10px; }
+
+    .slot-arrow {
+        font-size: 20px;
+        color: var(--primary-indigo);
+        transition: transform 0.3s ease;
+    }
+
+    .slot-arrow.open { transform: rotate(180deg); }
+
+    .slot-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+        border-top: 0px solid #eee;
+    }
+
+    .slot-body.open { max-height: 700px; border-top: 1px solid #eee; }
+
+    .slot-body-inner { padding: 20px 24px 24px; }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+
+    .detail-label { color: #888; font-weight: 500; min-width: 140px; }
+    .detail-value { color: var(--primary-blue); font-weight: 600; text-align: right; }
+
+    .limit-note {
+        text-align: center; color: white;
+        font-size: 13px; margin-top: 16px; opacity: 0.85;
+    }
+
+    .btn-edit-slot {
+        background: #3B82F6; color: white;
+        border: none; border-radius: 8px;
+        padding: 6px 14px; font-size: 13px;
+        font-weight: 600; cursor: pointer;
+    }
+
+    .btn-delete-slot {
+        background: #ef4444; color: white;
+        border: none; border-radius: 8px;
+        padding: 6px 14px; font-size: 13px;
+        font-weight: 600; cursor: pointer;
+    }
+
+    /* Modals */
+    .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.5); z-index: 9999;
+        align-items: center; justify-content: center;
+    }
+
+    .modal-box {
+        background: white; border-radius: 18px;
+        padding: 32px 28px; width: 90%; max-width: 440px;
+        text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .modal-icon  { font-size: 42px; margin-bottom: 12px; }
+    .modal-title { font-size: 20px; font-weight: 700; color: #1E3A8A; margin-bottom: 8px; }
+    .modal-msg   { color: #555; font-size: 15px; margin-bottom: 16px; line-height: 1.5; }
+
+    .modal-name {
+        font-weight: 700; color: #1E3A8A;
+        background: #eef2ff; padding: 2px 12px;
+        border-radius: 8px; display: inline-block; margin-bottom: 16px;
+    }
+
+    .modal-btns { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+
+    .modal-btns button {
+        padding: 10px 28px; border-radius: 10px;
+        font-weight: 600; font-size: 15px; cursor: pointer; border: none;
+    }
+
+    .btn-cancel  { background: #f3f4f6; color: #333; }
+    .btn-danger  { background: #ef4444; color: white; }
+    .btn-primary { background: #3B82F6; color: white; }
+
+    .edit-modal-box {
+        background: white; border-radius: 18px;
+        padding: 30px; width: 90%; max-width: 550px;
+        max-height: 90vh; overflow-y: auto;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .edit-field label {
+        font-weight: 600; font-size: 13px; color: #555; display: block; margin-bottom: 4px;
+    }
+
+    .edit-field input,
+    .edit-field select {
+        width: 100%; padding: 10px; border: 1px solid #ddd;
+        border-radius: 8px; box-sizing: border-box; font-size: 14px;
+    }
+
+    /* ── Logo Upload Widget ── */
+    .logo-upload-area {
+        border: 2px dashed #c7d2fe;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        background: #f8f9ff;
+        position: relative;
+    }
+
+    .logo-upload-area:hover {
+        border-color: var(--primary-indigo);
+        background: #eef2ff;
+    }
+
+    .logo-upload-area input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+
+    .logo-preview-wrap {
+        display: none;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        margin-top: 8px;
+    }
+
+    .logo-preview-wrap.visible { display: flex; }
+
+    .logo-preview-img {
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid #6ee7b7;
+    }
+
+    .logo-preview-info { font-size: 12px; color: #065f46; }
+    .logo-preview-info strong { display: block; font-size: 13px; }
+
+    .logo-remove-btn {
+        margin-left: auto;
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        color: #dc2626;
+        line-height: 1;
+        padding: 2px 6px;
+    }
+</style>
+
+
+<!-- ═══════════════════════════════════
+     ADD COMPANY SLIDE-DOWN FORM
+════════════════════════════════════ -->
+<div id="addCompanyPanel">
+    <div style="background:white; border-radius:20px; padding:30px; box-shadow:0 15px 40px rgba(0,0,0,0.15);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div>
+                <h3 style="color:#1E3A8A; margin:0; font-weight:700;">Add New Company</h3>
+                <p style="color:#888; font-size:13px; margin:4px 0 0;">Fill in the details below</p>
+            </div>
+            <button onclick="toggleAddForm()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#999;line-height:1;">✕</button>
+        </div>
+
+        <div id="addCompanyError"
+             style="display:none;background:#fef2f2;color:#dc2626;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;"></div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+            <div class="edit-field">
+                <label>Client Name</label>
+                <input type="text" id="add-clientname" placeholder="Client Name" />
+            </div>
+            <div class="edit-field">
+                <label>Phone</label>
+                <input type="text" id="add-phone" placeholder="Phone" />
+            </div>
+            <div class="edit-field">
+                <label>City</label>
+                <input type="text" id="add-city" placeholder="City" />
+            </div>
+            <div class="edit-field">
+                <label>Address</label>
+                <input type="text" id="add-address" placeholder="Address" />
+            </div>
+            <div class="edit-field">
+                <label>Company Name</label>
+                <input type="text" id="add-companyname" placeholder="Company Name" />
+            </div>
+            <div class="edit-field">
+                <label>Company Type</label>
+                <select id="add-companytype">
+                    <option value="">-- Select Type --</option>
+                    <option value="IT">IT (Software / Tech)</option>
+                    <option value="E-commerce">E-commerce</option>
+                    <option value="Education">Education</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Finance">Finance / Banking</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Retail">Retail / Shopping</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Construction">Construction</option>
+                    <option value="Agricultural">Agricultural</option>
+                    <option value="Industrial">Industrial</option>
+                    <option value="Transport">Transport / Logistics</option>
+                    <option value="Media">Media / Marketing</option>
+                    <option value="Government">Government</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="edit-field">
+                <label>Employees</label>
+                <input type="text" id="add-employees" placeholder="Number of Employees" />
+            </div>
+            <div class="edit-field">
+                <label>User ID</label>
+                <input type="text" id="add-userid" placeholder="User ID" />
+            </div>
+        </div>
+
+        <!-- ── Logo Upload (Add Form) ── -->
+        <div style="margin-top:16px;">
+            <label style="font-weight:600; font-size:13px; color:#555; display:block; margin-bottom:6px;">
+                Company Logo <span style="color:#aaa; font-weight:400;"></span>
+            </label>
+            <div class="logo-upload-area" onclick="document.getElementById('add-logo-input').click()">
+                <input type="file" id="add-logo-input" accept="image/*"
+                       style="display:none"
+                       onchange="handleLogoUpload('add', this)" />
+                <div id="add-logo-placeholder">
+                    <div style="font-size:28px; margin-bottom:6px;">🏢</div>
+                    <div style="font-weight:600; color:#6366f1; font-size:13px;">Click to upload logo</div>
+                    <div style="color:#aaa; font-size:12px; margin-top:2px;">PNG, JPG, SVG · Max 2MB</div>
+                </div>
+            </div>
+            <div class="logo-preview-wrap" id="add-logo-preview-wrap">
+                <img class="logo-preview-img" id="add-logo-preview-img" src="" alt="Logo preview" />
+                <div class="logo-preview-info">
+                    <strong id="add-logo-filename">logo.png</strong>
+                    
+                </div>
+                <button class="logo-remove-btn" onclick="removeLogo('add')" title="Remove logo">✕</button>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:24px; justify-content:flex-end;">
+            <button onclick="toggleAddForm()"
+                    style="padding:10px 24px;border-radius:10px;border:1px solid #ddd;font-weight:600;cursor:pointer;background:#f3f4f6;color:#333;">
+                Cancel
+            </button>
+            <button id="addCompanyBtn" onclick="submitAddCompany()"
+                    style="padding:10px 24px;border-radius:10px;border:none;font-weight:600;cursor:pointer;background:var(--gradient-main);color:white;">
+                ＋ Add Company
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Welcome Card -->
+<div class="welcome-card">
+    <h2 style="color: var(--primary-indigo); font-weight: 700;">Welcome, @userName! 👋</h2>
+    <p style="color: #666; margin-top: 6px;">Email: @userEmail</p>
+    <p style="color: #999; font-size: 13px; margin-top: 4px;">
+        You have <strong style="color: var(--primary-indigo);">@ViewBag.CompanyCount</strong> / 5 companies registered.
+    </p>
+
+    @if (ViewBag.CompanyCount < 5)
+    {
+        <button class="btn-action" onclick="toggleAddForm()">+ Add Company</button>
+    }
+    else
+    {
+        <button class="btn-action" style="background:#aaa; cursor:not-allowed;" disabled>
+            Max 5 Companies Reached
+        </button>
+    }
+
+    <a href="/Login/Login" class="btn-action" style="margin-left:10px;">Logout</a>
+</div>
+
+
+<!-- Company Slots -->
+@if (ViewBag.Companies != null && ViewBag.CompanyCount > 0)
+{
+    <div class="slots-container">
+        @{ int counter = 1; }
+
+        @foreach (var company in ViewBag.Companies)
+        {
+            <div class="company-slot">
+                <div class="slot-header" onclick="toggleSlot(@counter)">
+                    <div class="slot-header-left">
+                        <div class="slot-number">@counter</div>
+                            <div class="slot-logo-wrap" id="slot-logo-@company.RegId">🏢</div>
+
+                        <div>
+                            <div class="slot-title">@company.CompanyName</div>
+                            <div class="slot-subtitle">@company.CompanyType &nbsp;|&nbsp; @company.City</div>
+                        </div>
+                    </div>
+                    <div class="slot-header-right">
+                        <button class="btn-edit-slot"
+                                onclick="event.stopPropagation(); openEdit(
+                                    @company.RegId,
+                                    '@company.ClientName',
+                                    '@company.Phone',
+                                    '@company.Address',
+                                    '@company.City',
+                                    '@company.CompanyName',
+                                    '@company.CompanyType',
+                                    '@company.Employees',
+                                    '@company.UserId')">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn-delete-slot"
+                                onclick="event.stopPropagation(); showDelete(@company.RegId, '@company.CompanyName')">
+                            🗑️ Delete
+                        </button>
+                        <span class="slot-arrow" id="arrow-@counter">&#9662;</span>
+                    </div>
+                </div>
+
+                <div class="slot-body" id="body-@counter">
+                    <div class="slot-body-inner">
+
+                        <div class="detail-row" id="slot-logo-row-@company.RegId" style="display:none; align-items:center;">
+    <span class="detail-label">Company Logo</span>
+    <span class="detail-value">
+        <img id="slot-logo-expanded-@company.RegId" src="" alt="Company Logo" class="detail-logo-img" />
+    </span>
+</div>
+
+
+                        <div class="detail-row">
+                            <span class="detail-label">Client Name</span>
+                            <span class="detail-value">@company.ClientName</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Phone</span>
+                            <span class="detail-value">@company.Phone</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Address</span>
+                            <span class="detail-value">@company.Address</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">City</span>
+                            <span class="detail-value">@company.City</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Company Name</span>
+                            <span class="detail-value">@company.CompanyName</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Company Type</span>
+                            <span class="detail-value">@company.CompanyType</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Employees</span>
+                            <span class="detail-value">@company.Employees</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">User ID</span>
+                            <span class="detail-value">@company.UserId</span>
+                        </div>
+
+                        <button class="btn-print-pdf"
+        onclick="printCompanyPDF(
+            @company.RegId,
+            '@company.CompanyName',
+            '@company.CompanyType',
+            '@company.ClientName',
+            '@company.Phone',
+            '@company.Address',
+            '@company.City',
+            '@company.Employees',
+            '@company.UserId')">
+    🖨️ Download Company Profile PDF
+</button>
+
+
+                    </div>
+                </div>
+            </div>
+
+            counter++;
+        }
+    </div>
+
+    <p class="limit-note">&#9432; Maximum 5 companies allowed per account</p>
+}
+
+
+<!-- ═══════════════════════════════════
+     EDIT MODAL
+════════════════════════════════════ -->
+<div id="editModal" class="modal-overlay">
+    <div class="edit-modal-box">
+        <h3 style="color:#1E3A8A; margin-bottom:4px;">Edit Company</h3>
+        <p id="edit-subtitle" style="color:#888; font-size:13px; margin-bottom:20px;"></p>
+
+        <form method="post" action="/Dash/UpdateCompany" onsubmit="return confirmSave(event)">
+            <input type="hidden" id="edit-regid"  name="RegId" />
+            <input type="hidden" id="edit-userid" name="UserId" />
+
+            <div style="display:grid; gap:14px;">
+                <div class="edit-field">
+                    <label>Client Name</label>
+                    <input type="text" id="edit-clientname" name="ClientName" />
+                </div>
+                <div class="edit-field">
+                    <label>Phone</label>
+                    <input type="text" id="edit-phone" name="Phone" />
+                </div>
+                <div class="edit-field">
+                    <label>Address</label>
+                    <input type="text" id="edit-address" name="Address" />
+                </div>
+                <div class="edit-field">
+                    <label>City</label>
+                    <input type="text" id="edit-city" name="City" />
+                </div>
+                <div class="edit-field">
+                    <label>Company Name</label>
+                    <input type="text" id="edit-companyname" name="CompanyName" />
+                </div>
+                <div class="edit-field">
+                    <label>Company Type</label>
+                    <input type="text" id="edit-companytype" name="CompanyType" />
+                </div>
+                <div class="edit-field">
+                    <label>Employees</label>
+                    <input type="text" id="edit-employees" name="Employees" />
+                </div>
+            </div>
+
+            <!-- ── Logo Upload (Edit Form) ── -->
+            <div style="margin-top:16px;">
+                <label style="font-weight:600; font-size:13px; color:#555; display:block; margin-bottom:6px;">
+                    Company Logo <span style="color:#aaa; font-weight:400;"></span>
+                </label>
+                <div class="logo-upload-area" onclick="document.getElementById('edit-logo-input').click()">
+                    <input type="file" id="edit-logo-input" accept="image/*"
+                           style="display:none"
+                           onchange="handleLogoUpload('edit', this)" />
+                    <div id="edit-logo-placeholder">
+                        <div style="font-size:28px; margin-bottom:6px;">🏢</div>
+                        <div style="font-weight:600; color:#6366f1; font-size:13px;">Click to upload / replace logo</div>
+                        <div style="color:#aaa; font-size:12px; margin-top:2px;">PNG, JPG, SVG · Max 2MB</div>
+                    </div>
+                </div>
+                <div class="logo-preview-wrap" id="edit-logo-preview-wrap">
+                    <img class="logo-preview-img" id="edit-logo-preview-img" src="" alt="Logo preview" />
+                    <div class="logo-preview-info">
+                        <strong id="edit-logo-filename">logo.png</strong>
+                        <span></span>
+                    </div>
+                    <button type="button" class="logo-remove-btn" onclick="removeLogo('edit')" title="Remove logo">✕</button>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:24px; justify-content:flex-end;">
+                <button type="button" class="btn-cancel"
+                        onclick="closeModal('editModal')"
+                        style="padding:10px 20px;border-radius:10px;border:1px solid #ddd;font-weight:600;cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary"
+                        style="padding:10px 20px;border-radius:10px;border:none;font-weight:600;cursor:pointer;">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Save Confirm Modal -->
+<div id="saveModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-icon">💾</div>
+        <div class="modal-title">Save Changes?</div>
+        <div class="modal-msg">You are about to update:</div>
+        <div class="modal-name" id="save-company-name"></div>
+        <div class="modal-msg">Are you sure you want to save these changes?</div>
+        <div class="modal-btns">
+            <button class="btn-cancel"  onclick="closeModal('saveModal')">Cancel</button>
+            <button class="btn-primary" onclick="submitSave()">Yes, Save</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Delete Confirm Modal -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-icon">🗑️</div>
+        <div class="modal-title">Delete Company?</div>
+        <div class="modal-msg">You are about to permanently delete:</div>
+        <div class="modal-name" id="delete-company-name"></div>
+        <div class="modal-msg">This cannot be undone.</div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+            <button class="btn-danger" onclick="submitDelete()">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Hidden forms -->
+<form id="deleteForm" method="post" action="/Dash/DeleteCompany" style="display:none;">
+    <input type="hidden" id="delete-id" name="id" />
+</form>
+
+<form id="saveForm" method="post" action="/Dash/UpdateCompany" style="display:none;">
+    <input type="hidden" name="RegId"       id="sf-regid" />
+    <input type="hidden" name="ClientName"  id="sf-clientname" />
+    <input type="hidden" name="Phone"       id="sf-phone" />
+    <input type="hidden" name="Address"     id="sf-address" />
+    <input type="hidden" name="City"        id="sf-city" />
+    <input type="hidden" name="CompanyName" id="sf-companyname" />
+    <input type="hidden" name="CompanyType" id="sf-companytype" />
+    <input type="hidden" name="Employees"   id="sf-employees" />
+    <input type="hidden" name="UserId"      id="sf-userid" />
+</form>
+
+
+<script>
+const logoStore = {};
+let pendingAddLogo   = null;
+let currentEditRegId = null;
+
+// On page load: restore logos saved before last reload
+(function restoreLogos() {
+    const saved = localStorage.getItem('webnest_logos');
+    if (!saved) return;
+    try {
+        const map = JSON.parse(saved);
+        const cleaned = {};
+
+        Object.keys(map).forEach(key => {
+            if (key.startsWith('__pending__')) {
+                // Match by company name shown in slot titles
+                const cName = key.replace('__pending__', '');
+                document.querySelectorAll('.slot-title').forEach(el => {
+                    if (el.textContent.trim() === cName) {
+                        // Find the slot-logo id from sibling
+                        const header = el.closest('.slot-header');
+                        if (!header) return;
+                        const logoWrap = header.querySelector('[id^="slot-logo-"]');
+                        if (!logoWrap) return;
+                        const regId = logoWrap.id.replace('slot-logo-', '');
+                        logoStore[regId] = map[key];
+                        cleaned[regId]   = map[key];
+                        applyLogoToSlot(regId, map[key]);
+                    }
+                });
+            } else {
+                logoStore[key] = map[key];
+                cleaned[key]   = map[key];
+                applyLogoToSlot(key, map[key]);
+            }
+        });
+
+        localStorage.setItem('webnest_logos', JSON.stringify(cleaned));
+    } catch(e) {}
+})();
+
+
+
+function persistLogoStore() {
+    localStorage.setItem('webnest_logos', JSON.stringify(logoStore));
+}
+
+function handleLogoUpload(context, input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Image must be smaller than 2 MB.'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        document.getElementById(context + '-logo-placeholder').style.display = 'none';
+        document.getElementById(context + '-logo-preview-wrap').classList.add('visible');
+        document.getElementById(context + '-logo-preview-img').src = dataUrl;
+        document.getElementById(context + '-logo-filename').textContent = file.name;
+        if (context === 'add') {
+            pendingAddLogo = dataUrl;
+        } else if (context === 'edit' && currentEditRegId !== null) {
+            logoStore[String(currentEditRegId)] = dataUrl;
+            applyLogoToSlot(currentEditRegId, dataUrl);
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeLogo(context) {
+    document.getElementById(context + '-logo-placeholder').style.display = '';
+    document.getElementById(context + '-logo-preview-wrap').classList.remove('visible');
+    document.getElementById(context + '-logo-preview-img').src = '';
+    const inp = document.getElementById(context + '-logo-input');
+    if (inp) inp.value = '';
+    if (context === 'add') {
+        pendingAddLogo = null;
+    } else if (context === 'edit' && currentEditRegId !== null) {
+        delete logoStore[String(currentEditRegId)];
+        clearLogoFromSlot(currentEditRegId);
+    }
+}
+
+function applyLogoToSlot(regId, dataUrl) {
+    const id = String(regId);
+    const wrap = document.getElementById('slot-logo-' + id);
+    if (wrap) {
+        wrap.innerHTML = `<img src="${dataUrl}" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+        wrap.style.background = 'transparent';
+    }
+    const expandedImg = document.getElementById('slot-logo-expanded-' + id);
+    const expandedRow = document.getElementById('slot-logo-row-' + id);
+    if (expandedImg && expandedRow) {
+        expandedImg.src = dataUrl;
+        expandedRow.style.display = 'flex';
+    }
+        persistLogoStore();
+}
+
+function clearLogoFromSlot(regId) {
+    const id = String(regId);
+    const wrap = document.getElementById('slot-logo-' + id);
+    if (wrap) { wrap.innerHTML = '🏢'; wrap.style.background = 'var(--gradient-main)'; }
+    const expandedRow = document.getElementById('slot-logo-row-' + id);
+    if (expandedRow) expandedRow.style.display = 'none';
+    persistLogoStore(); 
+}
+
+function loadEditLogoPreview(regId) {
+    const dataUrl = logoStore[String(regId)];
+    const placeholder = document.getElementById('edit-logo-placeholder');
+    const wrap        = document.getElementById('edit-logo-preview-wrap');
+    const img         = document.getElementById('edit-logo-preview-img');
+    const fname       = document.getElementById('edit-logo-filename');
+    if (dataUrl) {
+        placeholder.style.display = 'none';
+        wrap.classList.add('visible');
+        img.src = dataUrl;
+        fname.textContent = 'current-logo.png';
+    } else {
+        placeholder.style.display = '';
+        wrap.classList.remove('visible');
+        img.src = '';
+        document.getElementById('edit-logo-input').value = '';
+    }
+}
+
+async function printCompanyPDF(regId, companyName, companyType, clientName, phone, address, city, employees, userId) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210, m = 20, cW = 170;
+    const navy=[30,58,138], indigo=[59,91,219], purple=[124,58,237];
+    const white=[255,255,255], light=[238,242,255], grey=[100,116,139];
+    const dark=[15,23,42], border=[203,213,225];
+
+    doc.setFillColor(...navy);   doc.rect(0, 0, W, 52, 'F');
+    doc.setFillColor(...indigo); doc.rect(0, 44, W, 8, 'F');
+    doc.setFillColor(...purple); doc.triangle(W-60, 0, W, 0, W, 60, 'F');
+
+    const logoDataUrl = logoStore[String(regId)] || null;
+    if (logoDataUrl) {
+        try {
+            let fmt = 'JPEG';
+            if (logoDataUrl.includes('image/png')) fmt = 'PNG';
+            doc.setFillColor(...white);
+            doc.roundedRect(m, 8, 32, 32, 4, 4, 'F');
+            doc.addImage(logoDataUrl, fmt, m+1, 9, 30, 30);
+        } catch(e) {
+            doc.setFillColor(...light);
+            doc.roundedRect(m, 8, 32, 32, 4, 4, 'F');
+        }
+    } else {
+        doc.setFillColor(...light);
+        doc.roundedRect(m, 8, 32, 32, 4, 4, 'F');
+    }
+
+    doc.setTextColor(...white);
+    doc.setFontSize(20); doc.setFont('helvetica','bold');
+    doc.text(companyName, m+38, 22);
+    doc.setFontSize(10); doc.setFont('helvetica','normal');
+    doc.setTextColor(199,210,254);
+    doc.text(companyType + '  •  ' + city, m+38, 30);
+    doc.setFontSize(7); doc.setFont('helvetica','bold');
+    doc.setTextColor(167,139,250);
+    doc.text('COMPANY PROFILE', W-m-1, 10, { align:'right' });
+    doc.setFont('helvetica','normal');
+    const now = new Date();
+    doc.text('Generated: ' + now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), W-m-1, 16, { align:'right' });
+
+    let y = 60;
+
+    function drawSection(title, rows) {
+        doc.setFillColor(...light);
+        doc.roundedRect(m, y, cW, 9, 2, 2, 'F');
+        doc.setDrawColor(...indigo); doc.setLineWidth(0.4);
+        doc.roundedRect(m, y, cW, 9, 2, 2, 'S');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...navy);
+        doc.text(title, m+4, y+6);
+        y += 14;
+        rows.forEach((row, i) => {
+            const ry = y + i * 14;
+            if (i % 2 === 0) { doc.setFillColor(248,250,252); doc.rect(m, ry-1, cW, 13, 'F'); }
+            doc.setDrawColor(...border); doc.setLineWidth(0.2);
+            doc.line(m, ry+12, m+cW, ry+12);
+            doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...grey);
+            doc.text(row[0], m+4, ry+7);
+            doc.setFont('helvetica','bold'); doc.setTextColor(...dark);
+            const val = String(row[1]||'—');
+            doc.text(val.length>30 ? val.substring(0,30)+'…' : val, m+cW-4, ry+7, { align:'right' });
+        });
+        y += rows.length * 14 + 8;
+    }
+
+    drawSection('COMPANY INFORMATION', [
+        ['Company Name', companyName],
+        ['Company Type', companyType],
+        ['City',         city],
+        ['Address',      address],
+    ]);
+
+    drawSection('CLIENT DETAILS', [
+        ['Client Name', clientName],
+        ['Phone',       phone],
+        ['Employees',   employees],
+        ['User ID',     userId],
+    ]);
+
+    const boxW = (cW - 10) / 3;
+    [['Employees',employees],['Industry',companyType],['Location',city]].forEach((s,i) => {
+    const bx = m + i*(boxW+5);
+    doc.setFillColor(...light); doc.setDrawColor(...border); doc.setLineWidth(0.3);
+    doc.roundedRect(bx, y, boxW, 22, 3, 3, 'FD');
+
+    // Coloured left accent bar
+    doc.setFillColor(...indigo);
+    doc.roundedRect(bx, y, 3, 22, 1, 1, 'F');
+
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...grey);
+    doc.text(s[0].toUpperCase(), bx+7, y+8);
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...navy);
+    const v = String(s[1]||'—');
+    doc.text(v.length>16 ? v.substring(0,16)+'…' : v, bx+7, y+16);
+});
+
+    doc.setDrawColor(...border); doc.setLineWidth(0.3); doc.line(m, 277, W-m, 277);
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(...navy);
+    doc.text('WebNest', m, 284);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...grey);
+    doc.text('Company Management Platform', m, 289);
+    doc.text('Page 1 of 1', W-m, 284, { align:'right' });
+    doc.setFillColor(...navy);   doc.rect(0, 292, W/3, 5, 'F');
+    doc.setFillColor(...indigo); doc.rect(W/3, 292, W/3, 5, 'F');
+    doc.setFillColor(...purple); doc.rect((W/3)*2, 292, W/3, 5, 'F');
+
+    doc.save(companyName.replace(/[^a-z0-9]/gi,'_') + '_Company_Details.pdf');
+}
+
+function toggleSlot(index) {
+    const body  = document.getElementById('body-'  + index);
+    const arrow = document.getElementById('arrow-' + index);
+    const isOpen = body.classList.contains('open');
+    document.querySelectorAll('.slot-body').forEach(b  => b.classList.remove('open'));
+    document.querySelectorAll('.slot-arrow').forEach(a => a.classList.remove('open'));
+    if (!isOpen) { body.classList.add('open'); arrow.classList.add('open'); }
+}
+
+function openModal(id)  { document.getElementById(id).style.display = "flex"; }
+function closeModal(id) { document.getElementById(id).style.display = "none"; }
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); });
+});
+
+function openEdit(regId, clientName, phone, address, city, companyName, companyType, employees, userId) {
+    currentEditRegId = regId;
+    document.getElementById('edit-regid').value       = regId;
+    document.getElementById('edit-clientname').value  = clientName;
+    document.getElementById('edit-phone').value       = phone;
+    document.getElementById('edit-address').value     = address;
+    document.getElementById('edit-city').value        = city;
+    document.getElementById('edit-companyname').value = companyName;
+    document.getElementById('edit-companytype').value = companyType;
+    document.getElementById('edit-employees').value   = employees;
+    document.getElementById('edit-userid').value      = userId;
+    document.getElementById('edit-subtitle').textContent = 'Editing: ' + companyName;
+    loadEditLogoPreview(regId);
+    openModal('editModal');
+}
+
+function confirmSave(e) {
+    e.preventDefault();
+    const name = document.getElementById('edit-companyname').value;
+    document.getElementById('save-company-name').textContent = name;
+    document.getElementById('sf-regid').value       = document.getElementById('edit-regid').value;
+    document.getElementById('sf-clientname').value  = document.getElementById('edit-clientname').value;
+    document.getElementById('sf-phone').value       = document.getElementById('edit-phone').value;
+    document.getElementById('sf-address').value     = document.getElementById('edit-address').value;
+    document.getElementById('sf-city').value        = document.getElementById('edit-city').value;
+    document.getElementById('sf-companyname').value = name;
+    document.getElementById('sf-companytype').value = document.getElementById('edit-companytype').value;
+    document.getElementById('sf-employees').value   = document.getElementById('edit-employees').value;
+    document.getElementById('sf-userid').value      = document.getElementById('edit-userid').value;
+    closeModal('editModal'); openModal('saveModal'); return false;
+}
+function submitSave() { document.getElementById('saveForm').submit(); }
+
+function showDelete(id, name) {
+    document.getElementById('delete-id').value = id;
+    document.getElementById('delete-company-name').textContent = name;
+    openModal('deleteModal');
+}
+function submitDelete() { document.getElementById('deleteForm').submit(); }
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <text>
+    Swal.fire({ icon:'success', title:'Success!', text:'@TempData["SuccessMessage"]', timer:2000, showConfirmButton:false, timerProgressBar:true });
+    </text>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <text>
+    Swal.fire({ icon:'error', title:'Error!', text:'@TempData["ErrorMessage"]', timer:2000, showConfirmButton:false });
+    </text>
+}
+
+let addFormOpen = false;
+function toggleAddForm() {
+    const panel = document.getElementById('addCompanyPanel');
+    addFormOpen = !addFormOpen;
+    if (addFormOpen) { panel.classList.add('open'); window.scrollTo({ top:0, behavior:'smooth' }); }
+    else { panel.classList.remove('open'); clearAddForm(); document.getElementById('addCompanyError').style.display = 'none'; }
+}
+
+function submitAddCompany() {
+    const btn      = document.getElementById('addCompanyBtn');
+    const errorBox = document.getElementById('addCompanyError');
+    const clientName  = document.getElementById('add-clientname').value.trim();
+    const phone       = document.getElementById('add-phone').value.trim();
+    const city        = document.getElementById('add-city').value.trim();
+    const address     = document.getElementById('add-address').value.trim();
+    const companyName = document.getElementById('add-companyname').value.trim();
+    const companyType = document.getElementById('add-companytype').value;
+    const employees   = document.getElementById('add-employees').value.trim();
+    const userId      = document.getElementById('add-userid').value.trim();
+    if (!clientName || !phone || !city || !address || !companyName || !companyType || !employees) {
+        errorBox.textContent = '⚠️ Please fill in all required fields.';
+        errorBox.style.display = 'block';
+        return;
+    }
+    errorBox.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Adding...';
+    const formData = new FormData();
+    formData.append('ClientName',  clientName);
+    formData.append('Phone',       phone);
+    formData.append('City',        city);
+    formData.append('Address',     address);
+    formData.append('CompanyName', companyName);
+    formData.append('CompanyType', companyType);
+    formData.append('Employees',   employees);
+    formData.append('UserId',      userId);
+    fetch('/Registration/Add', { method:'POST', body: formData })
+    .then(response => {
+        
+
+        if (response.redirected || response.ok) {
+    // Save pending logo keyed by company name so after reload we can match it
+    if (pendingAddLogo) {
+        const tempMap = JSON.parse(localStorage.getItem('webnest_logos') || '{}');
+        tempMap['__pending__' + companyName] = pendingAddLogo;
+        localStorage.setItem('webnest_logos', JSON.stringify(tempMap));
+    }
+    toggleAddForm();
+    Swal.fire({ icon:'success', title:'Success!', text:'Company added successfully!', timer:1500, showConfirmButton:false, timerProgressBar:true })
+        .then(() => location.reload());
+}
+
+
+        else {
+            errorBox.textContent = '❌ Something went wrong. Please try again.';
+            errorBox.style.display = 'block';
+        }
+    })
+    .catch(() => {
+        errorBox.textContent = '❌ Network error. Please try again.';
+        errorBox.style.display = 'block';
+    })
+    .finally(() => { btn.disabled = false; btn.textContent = '＋ Add Company'; });
+}
+
+function clearAddForm() {
+    ['add-clientname','add-phone','add-city','add-address',
+     'add-companyname','add-companytype','add-employees','add-userid']
+        .forEach(id => document.getElementById(id).value = '');
+    removeLogo('add');
+}
+</script>
